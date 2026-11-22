@@ -469,7 +469,7 @@ async function buildEgg(renderer, screenTex) {
   const key = new THREE.DirectionalLight('#fff4e6', 1.8); key.position.set(-2, 3, 4); scene.add(key);
   const rim = new THREE.DirectionalLight('#9fc6ff', 1.2); rim.position.set(3, 1, -2); scene.add(rim);
 
-  const camera = new THREE.PerspectiveCamera(30, 1, .1, 50); camera.position.set(0, .15, 5.7); camera.lookAt(0, .12, 0);
+  const camera = new THREE.PerspectiveCamera(30, 1, .1, 50); camera.position.set(0, .15, 4.9); camera.lookAt(0, .1, 0);
   return { scene, camera, egg, BTN, scr };
 }
 
@@ -483,10 +483,39 @@ async function init() {
 
   const rt = new THREE.WebGLRenderTarget(700, 600, { samples: 4 });
   const room = buildRoom(), fern = buildFern(); room.scene.add(fern.root);
-  const H = 4.45; room.camera.left = -H * 700 / 600; room.camera.right = H * 700 / 600; room.camera.top = H; room.camera.bottom = -H; room.camera.updateProjectionMatrix();
+  const H = 3.55; room.camera.left = -H * 700 / 600; room.camera.right = H * 700 / 600; room.camera.top = H; room.camera.bottom = -H; room.camera.updateProjectionMatrix();
   const life = makeLife(room, fern);
   const egg = await buildEgg(renderer, rt.texture);
   FernPet.onAct(life.onAct);
+
+  // painel do aparelho, dentro da tela: recado em cima, as 4 barras embaixo
+  const hud = ctex(700, 600, () => {});
+  const hudScene = new THREE.Scene(), hudCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  hudScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.MeshBasicMaterial({ map: hud, transparent: true, depthTest: false, toneMapped: false })));
+  const NEEDS = ['job', 'sono', 'breja', 'trampo'];
+  let hudT = 0, hudKey = '';
+  function drawHud(t) {
+    const st = FernPet.state(), say = (document.getElementById('pmsg')?.textContent || '').toUpperCase();
+    const key = say + NEEDS.map(k => st[k] | 0).join(',') + (st.sleeping ? 'z' : '') + ((t * 2 | 0) % 2);
+    if (key === hudKey) return; hudKey = key;
+    const { c, g } = hud.userData, w = c.width, h = c.height;
+    g.clearRect(0, 0, w, h);
+    g.fillStyle = 'rgba(14,18,28,.82)'; g.fillRect(0, 0, w, 76); g.fillRect(0, h - 104, w, 104);
+    g.fillStyle = '#ffd21f'; g.fillRect(0, 74, w, 4); g.fillRect(0, h - 106, w, 4);
+    let fs = 40; g.font = `bold ${fs}px ui-monospace, Menlo, monospace`;
+    while (g.measureText(say).width > w - 40 && fs > 20) { fs--; g.font = `bold ${fs}px ui-monospace, Menlo, monospace`; }
+    g.fillStyle = '#fff3cf'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(say || (st.sleeping ? 'ZZZ…' : 'FERN.PET'), w / 2, 39);
+    const cw = (w - 24) / 4;
+    NEEDS.forEach((k, i) => {
+      const x = 12 + i * cw, v = Math.max(0, Math.min(100, st[k])), low = v < 25;
+      g.textAlign = 'left'; g.font = 'bold 30px ui-monospace, Menlo, monospace'; g.fillStyle = low && (t * 2 | 0) % 2 ? '#ff6b6b' : '#e9dcc2';
+      g.fillText(k.toUpperCase(), x + 6, h - 72);
+      g.strokeStyle = '#e9dcc2'; g.lineWidth = 2; g.lineWidth = 3; g.strokeRect(x + 6, h - 46, cw - 18, 26);
+      g.fillStyle = low ? '#ff6b6b' : '#7fc8c0'; g.fillRect(x + 10, h - 42, (cw - 26) * v / 100, 18);
+    });
+    hud.needsUpdate = true;
+  }
 
   function size() {
     const r = host.getBoundingClientRect(); if (!r.width) return;
@@ -527,13 +556,15 @@ async function init() {
     const t = now / 1000;
     life.update(dt, t);
     zk += ((zoomed ? 1 : 0) - zk) * .08;
-    egg.camera.position.set(0, lerp(.15, .16, zk), lerp(5.7, 2.7, zk)); egg.camera.lookAt(0, lerp(.12, .16, zk), 0);
+    egg.camera.position.set(0, lerp(.15, .16, zk), lerp(4.9, 2.7, zk)); egg.camera.lookAt(0, lerp(.1, .16, zk), 0);
     rx += (tx * (1 - zk * .85) - rx) * .06; ry += (ty * (1 - zk * .85) - ry) * .06;
     egg.egg.rotation.set(rx + (still ? 0 : Math.sin(t * .8) * .03), ry + (still ? 0 : Math.sin(t * .5) * .06), 0);
     egg.egg.position.y = still ? 0 : Math.sin(t * 1.2) * .03;
     for (const b of egg.BTN) b.position.z = lerp(b.position.z, b === pressed && pressT > 0 ? -.015 : .02, .4);
     pressT -= dt;
+    if (t - hudT > .2) { hudT = t; drawHud(t); }
     renderer.setRenderTarget(rt); renderer.render(room.scene, room.camera);
+    renderer.autoClear = false; renderer.render(hudScene, hudCam); renderer.autoClear = true;
     renderer.setRenderTarget(null); renderer.render(egg.scene, egg.camera);
   }
   requestAnimationFrame(frame);

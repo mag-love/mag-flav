@@ -256,3 +256,5 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 #poke.has3d .egg-btns button{flex-direction:row;padding:6px 9px;border:1.5px solid var(--ink);border-radius:99px;font-size:9px}
 #poke.has3d .egg-btns button::before{width:9px;height:9px}
 @media (max-width:720px){#poke.win.has3d{width:100%}}
+/* 3D: recado, barras e botões vivem dentro do aparelho; os HTML ficam só pra leitor de tela */
+#poke.has3d .egg-btns,#poke.has3d #pmsg,#poke.has3d #bars{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
