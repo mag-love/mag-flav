@@ -164,7 +164,16 @@ function buildRoom() {
   const fridgeLight = new THREE.PointLight('#fff1c4', 0, 2.2, 2); fridgeLight.position.set(-2.8, 1, 1.3); scene.add(fridgeLight);
 
   // pufe, tapete e planta
-  mesh(new THREE.SphereGeometry(.62, 32, 16), mat('#d9a13b', { roughness: .95 }), .9, .3, .9, scene).scale.set(1, .52, 1);
+  mesh(new THREE.SphereGeometry(.62, 32, 16), mat('#d9a13b', { roughness: .95 }), .9, .3, 1.05, scene).scale.set(1, .5, 1);
+  // cantinho do videogame: rack, TV de tubo e console
+  const rackWood = mat('#6b4a2f', { roughness: .8 });
+  box(1.1, .42, .5, rackWood, .9, .21, -.75, scene);
+  box(.84, .62, .58, mat('#3a3633', { roughness: .5 }), .9, .74, -.78, scene);
+  const game = ctex(160, 120, () => {});
+  const gameScr = mesh(new THREE.PlaneGeometry(.64, .46), new THREE.MeshBasicMaterial({ map: game }), .9, .75, -.485, scene); gameScr.castShadow = false;
+  box(.36, .07, .26, mat('#8f8a80'), .55, .46, -.72, scene);
+  box(.05, .02, .02, mat('#c0392b', { emissive: '#ff3b30', emissiveIntensity: 1 }), .45, .47, -.585, scene);
+  const tvLight = new THREE.PointLight('#7fb0ff', 0, 2.6, 2); tvLight.position.set(.9, .8, -.1); scene.add(tvLight);
   const rugT = ctex(256, 256, (g, w) => { for (let r = 8; r > 0; r--) { g.fillStyle = r % 2 ? '#2b3b8f' : '#e9dcc2'; g.beginPath(); g.arc(128, 128, r * 16, 0, 7); g.fill(); } });
   const rug = mesh(new THREE.CylinderGeometry(1.7, 1.7, .02, 48), mat('#fff', { map: rugT }), .6, .01, .4, scene); rug.castShadow = false;
   mesh(new THREE.CylinderGeometry(.22, .17, .4, 16), mat('#b5552f'), 3.45, .2, -3.45, scene);
@@ -182,7 +191,7 @@ function buildRoom() {
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 60);
   camera.position.set(10, 8.6, 10); camera.lookAt(0, .9, 0);
 
-  return { scene, camera, tl, fridgeDoor, fridgeLight, deskCan, monitorGlow };
+  return { scene, camera, tl, fridgeDoor, fridgeLight, deskCan, monitorGlow, game, tvLight };
 }
 
 /* ---------- o Fern (boneco low-poly, sem rosto inventado: barba, careca, camiseta preta) ---------- */
@@ -207,9 +216,11 @@ function buildFern() {
   const can = mesh(new THREE.CylinderGeometry(.06, .06, .2, 16), mat('#2f8a4f', { metalness: .7, roughness: .3 }), 0, 0, .05, handR); can.visible = false;
   const env = box(.3, .2, .03, mat('#fffaf0', { emissive: '#ffe08a', emissiveIntensity: .3 }), 0, 0, .1, handL);
   box(.08, .08, .02, mat('#c0392b'), 0, 0, .02, env); env.visible = false;
+  const pad = box(.42, .07, .17, mat('#2a2a2e', { roughness: .4 }), 0, 1.22, .5, body); pad.visible = false;
+  for (const [x, c] of [[-.12, '#888'], [.1, '#c0392b'], [.15, '#2b3b8f']]) box(.05, .03, .05, mat(c), x, .045, 0, pad);
   const icon = new THREE.Sprite(new THREE.SpriteMaterial({ map: iconTex('heart'), depthTest: false })); icon.scale.set(.55, .55, 1); icon.position.y = 2.75; icon.visible = false; root.add(icon);
   root.traverse(o => { if (o.isMesh) o.castShadow = true; });
-  return { root, body, legL, legR, armL, armR, head, torso, handR, handL, can, env, icon };
+  return { root, body, legL, legR, armL, armR, head, torso, handR, handL, can, env, icon, pad };
 }
 
 /* ---------- vida no quarto ---------- */
@@ -218,13 +229,13 @@ function makeLife(room, fern) {
     bed: { x: -1.65, z: -2.3, lie: { x: -2.95, y: .86, z: -1.45 } },
     desk: { x: 1.6, z: -2.45, face: Math.PI, pose: 'type', via: { x: 1.6, z: -1.5 } },
     fridge: { x: -2.45, z: 1.3, face: -Math.PI / 2, pose: 'stand' },
-    bean: { x: .9, z: .9, face: Math.PI / 4, pose: 'bean' },
+    bean: { x: .9, z: 1.12, face: Math.PI, pose: 'bean' },
     door: { x: -3.15, z: -.35, face: -Math.PI / 2, pose: 'stand' },
     window: { x: -.6, z: -3.15, face: Math.PI, pose: 'stand' },
     shelf: { x: -3.1, z: 2.7, face: -Math.PI / 2, pose: 'stand' },
-    mid: { x: .4, z: -.6, face: Math.PI / 4, pose: 'stand' }
+    mid: { x: -.5, z: .3, face: Math.PI / 4, pose: 'stand' }
   };
-  const P = fern.root.position; P.set(.4, 0, -.6);
+  const P = fern.root.position; P.set(-.5, 0, .3);
   fern.root.rotation.order = 'YXZ'; room.scene.add(fern.icon); // ícone fica no quarto, não gira com o corpo
   let task = null, pose = 'stand', idleT = 2, walkPh = 0, iconK = null, iconT = 0, eat = 0, drink = 0, hop = 0, face = Math.PI / 4;
   const icons = {}; for (const k in ICONS) icons[k] = iconTex(k);
@@ -306,7 +317,9 @@ function makeLife(room, fern) {
     const sw = moving ? Math.sin(walkPh) : 0;
     let lL = sw * .6, lR = -sw * .6, aL = -sw * .5, aR = sw * .5, by = 0, hx = 0, rx = 0;
     if (pose === 'type') { lL = lR = -1.5; by = -.33; aL = aR = -1.15 + Math.sin(t * 22) * .06; aR -= Math.sin(t * 19) * .06; hx = .12; }
-    if (pose === 'bean') { lL = lR = -1.3; by = -.42; aL = aR = -.25; }
+    const playing = pose === 'bean' && drink <= 0;
+    if (pose === 'bean') { lL = lR = -1.25; by = -.27; aL = aR = -.25; }
+    if (playing) { aL = -1 + Math.sin(t * 17) * .04; aR = -1 + Math.sin(t * 13 + 1) * .04; hx = .1 + Math.sin(t * 1.7) * .05; }
     if (pose === 'lie') { rx = -Math.PI / 2; aL = aR = .1; }
     if (eat > 0) { eat -= dt; aL = -2.1; aR = -.4; hx = -.1; fern.env.scale.setScalar(Math.max(.01, Math.min(1, eat / 1.6))); if (Math.random() < .03) showIcon('heart', .8); }
     if (drink > 0) { drink -= dt; const sip = (t % 2.2) < .9; aR = sip ? -2.5 : -1.2; hx = sip ? -.3 : 0; }
@@ -314,6 +327,10 @@ function makeLife(room, fern) {
     fern.legL.rotation.x = lerp(fern.legL.rotation.x, lL, k); fern.legR.rotation.x = lerp(fern.legR.rotation.x, lR, k);
     fern.armL.rotation.x = lerp(fern.armL.rotation.x, aL, k); fern.armR.rotation.x = lerp(fern.armR.rotation.x, aR, k);
     fern.head.rotation.x = lerp(fern.head.rotation.x, hx, k);
+    fern.armL.rotation.z = lerp(fern.armL.rotation.z, playing ? .3 : 0, k); fern.armR.rotation.z = lerp(fern.armR.rotation.z, playing ? -.3 : 0, k);
+    fern.pad.visible = playing;
+    room.tvLight.intensity = playing ? 1.4 + Math.sin(t * 23) * .3 : 0;
+    drawGame(room, t, playing);
     fern.body.position.y = lerp(fern.body.position.y, by, k);
     fern.root.rotation.x = rx;
     fern.root.rotation.y = angLerp(fern.root.rotation.y, face, Math.min(1, dt * 8));
@@ -332,7 +349,32 @@ function makeLife(room, fern) {
     room.deskCan.visible = !fern.can.visible;
     drawScreen(room, t, pose === 'type', st.sleeping);
   }
-  return { update, onAct };
+  return { update, onAct, go };
+}
+
+// TV: jogo de corrida em pixel quando ele joga, chiado quando não
+let lastGame = 0;
+function drawGame(room, t, on) {
+  if (t - lastGame < .08) return; lastGame = t;
+  const { c, g } = room.game.userData, w = c.width, h = c.height;
+  if (!on) {
+    for (let i = 0; i < 300; i++) { const v = Math.random() * 40 | 0; g.fillStyle = `rgb(${v},${v},${v + 6})`; g.fillRect(Math.random() * w | 0, Math.random() * h | 0, 4, 3); }
+    room.game.needsUpdate = true; return;
+  }
+  g.fillStyle = '#ff8fb1'; g.fillRect(0, 0, w, h * .45);
+  g.fillStyle = '#ffd21f'; g.beginPath(); g.arc(w / 2, h * .42, 16, Math.PI, 0); g.fill();
+  g.fillStyle = '#2b3b8f'; g.fillRect(0, h * .45, w, h * .55);
+  const curve = Math.sin(t * .7) * 30;
+  for (let y = 0; y < h * .55; y += 3) {
+    const k = y / (h * .55), cx = w / 2 + curve * (1 - k) * (1 - k), rw = 8 + k * 120;
+    g.fillStyle = ((y + t * 60) % 18 < 9) ? '#e9dcc2' : '#d14b6e'; g.fillRect(cx - rw / 2 - 6, h * .45 + y, rw + 12, 3);
+    g.fillStyle = '#3a3633'; g.fillRect(cx - rw / 2, h * .45 + y, rw, 3);
+    if (((y + t * 90) % 24) < 3) { g.fillStyle = '#fff'; g.fillRect(cx - 1, h * .45 + y, 2, 3); }
+  }
+  const px = w / 2 + Math.sin(t * 1.3) * 18;
+  g.fillStyle = '#c0392b'; g.fillRect(px - 10, h - 22, 20, 12); g.fillStyle = '#111'; g.fillRect(px - 12, h - 14, 5, 6); g.fillRect(px + 7, h - 14, 5, 6);
+  g.fillStyle = '#fff'; g.font = 'bold 10px monospace'; g.fillText('LAP ' + (1 + (t / 9 | 0) % 3) + '/3', 6, 12);
+  room.game.needsUpdate = true;
 }
 
 // tela do computador: timeline quando ele trabalha, protetor de tela quando não
@@ -364,8 +406,8 @@ async function buildEgg(renderer, screenTex) {
   scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
   const egg = new THREE.Group(); scene.add(egg);
 
-  const HS = 1.15, FLAT = .44;
-  const R = yn => .95 * Math.sqrt(Math.max(0, 1 - yn * yn)) * (1 - .1 * yn);
+  const HS = 1.15, FLAT = .39;
+  const R = yn => 1.07 * Math.sqrt(Math.max(0, 1 - yn * yn)) * (1 - .1 * yn);
   const surfZ = (x, y) => FLAT * Math.sqrt(Math.max(0, R(y / HS) ** 2 - x * x));
   function onSurface(o, x, y, off = 0) {
     const z = surfZ(x, y), dzdy = (surfZ(x, y + .01) - surfZ(x, y - .01)) / .02, dzdx = (surfZ(x + .01, y) - surfZ(x - .01, y)) / .02;
@@ -403,18 +445,20 @@ async function buildEgg(renderer, screenTex) {
   // marca e etiquetas impressas
   const label = (txt, w, h, size, color = '#2b3b8f') => new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ transparent: true, depthTest: false, roughness: .5, map: ctex(512, Math.round(512 * h / w), (g, cw, ch) => { g.fillStyle = color; g.font = `italic 800 ${size}px Archivo, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, cw / 2, ch / 2); }) }));
   onSurface(label('FERN.PET', .62, .14, 96), 0, .93, .006);
-  onSurface(label('MAG FLAV · EDITOR SIMULATOR', .9, .07, 30, '#9a2257'), 0, -.6, .01);
+  onSurface(label('MAG FLAV · EDITOR SIMULATOR', 1, .075, 28, '#9a2257'), 0, -.54, .01);
 
   // botões
   const KEYS = ['job', 'sono', 'breja', 'trampo'], BTN = [];
   const btnMat = new THREE.MeshPhysicalMaterial({ color: '#ffd21f', roughness: .3, clearcoat: 1, clearcoatRoughness: .08 });
+  // botões em pílula, 2 x 2, com o nome impresso em cima (cabe o texto e dá pra ler)
+  const capGeo = new THREE.ExtrudeGeometry(rr(.44, .15, .075), { depth: .04, bevelEnabled: true, bevelThickness: .02, bevelSize: .015, bevelSegments: 4, curveSegments: 10 });
   KEYS.forEach((k, i) => {
-    const x = (i - 1.5) * .27, y = -.78 - Math.abs(i - 1.5) * .03;
+    const x = (i % 2 ? 1 : -1) * .25, y = i < 2 ? -.73 : -.93;
     const g = new THREE.Group(); onSurface(g, x, y, 0);
-    const b = new THREE.Mesh(new THREE.CylinderGeometry(.095, .1, .09, 32), btnMat); b.rotation.x = Math.PI / 2; b.position.z = .02; g.add(b);
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(.105, .014, 8, 32), new THREE.MeshStandardMaterial({ color: '#c97f8c', roughness: .6 })); g.add(ring);
+    const b = new THREE.Mesh(capGeo, btnMat); b.position.z = .02; g.add(b);
+    const ring = new THREE.Mesh(new THREE.ShapeGeometry(rr(.5, .2, .1), 10), new THREE.MeshStandardMaterial({ color: '#c97f8c', roughness: .6 })); ring.position.z = -.005; g.add(ring);
+    const t = label(k.toUpperCase(), .4, .12, 104); t.position.z = .065; t.renderOrder = 2; b.add(t);
     b.userData.k = k; BTN.push(b);
-    onSurface(label(k.toUpperCase(), .3, .07, 96), x, y - .18, .05).rotation.set(0, 0, 0); // de frente: na curva ficava de lado
   });
 
   // argola e correntinha
@@ -425,7 +469,7 @@ async function buildEgg(renderer, screenTex) {
   const key = new THREE.DirectionalLight('#fff4e6', 1.8); key.position.set(-2, 3, 4); scene.add(key);
   const rim = new THREE.DirectionalLight('#9fc6ff', 1.2); rim.position.set(3, 1, -2); scene.add(rim);
 
-  const camera = new THREE.PerspectiveCamera(30, 1, .1, 50); camera.position.set(0, .15, 5.4); camera.lookAt(0, .12, 0);
+  const camera = new THREE.PerspectiveCamera(30, 1, .1, 50); camera.position.set(0, .15, 5.7); camera.lookAt(0, .12, 0);
   return { scene, camera, egg, BTN, scr };
 }
 
@@ -483,7 +527,7 @@ async function init() {
     const t = now / 1000;
     life.update(dt, t);
     zk += ((zoomed ? 1 : 0) - zk) * .08;
-    egg.camera.position.set(0, lerp(.15, .16, zk), lerp(5.4, 2.7, zk)); egg.camera.lookAt(0, lerp(.12, .16, zk), 0);
+    egg.camera.position.set(0, lerp(.15, .16, zk), lerp(5.7, 2.7, zk)); egg.camera.lookAt(0, lerp(.12, .16, zk), 0);
     rx += (tx * (1 - zk * .85) - rx) * .06; ry += (ty * (1 - zk * .85) - ry) * .06;
     egg.egg.rotation.set(rx + (still ? 0 : Math.sin(t * .8) * .03), ry + (still ? 0 : Math.sin(t * .5) * .06), 0);
     egg.egg.position.y = still ? 0 : Math.sin(t * 1.2) * .03;
@@ -494,7 +538,7 @@ async function init() {
   }
   requestAnimationFrame(frame);
   // gancho de teste: avança n quadros mesmo com a aba em segundo plano
-  window.FernPet3D = { _test(n = 60) { for (let i = 0; i < n; i++) step(last + 1000 / 60); } };
+  window.FernPet3D = { _test(n = 60) { for (let i = 0; i < n; i++) step(last + 1000 / 60); }, _go: n => life.go(n, 30) };
   poke.classList.add('has3d');
 }
 

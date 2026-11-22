@@ -248,7 +248,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 
 /* FERN.PET 3D (22/11): ovo vintage em three.js com o quarto do editor na tela */
 #pet3d{display:none}
-#poke.win.has3d{width:min(440px,calc(100vw - 32px))}
+#poke.win.has3d{width:min(540px,calc(100vw - 32px))}
 #poke.has3d #pet3d{display:block;width:100%;aspect-ratio:1/1.08;touch-action:manipulation}
 #poke.has3d #pet3d canvas{width:100%;height:100%;display:block}
 #poke.has3d .egg{background:none;border:0;box-shadow:none;width:auto;aspect-ratio:auto;margin:0 auto 4px}
