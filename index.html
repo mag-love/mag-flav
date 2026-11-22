@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAG FLAV — Fernando Freitas, call me Fern</title>
+<meta name="description" content="Fern's corner of the internet: who I am and the stuff I keep cutting, drawing and building.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@1,62..125,100..900&display=swap">
+<link rel="stylesheet" href="css/site.css?v=6">
+</head>
+<body>
+<main id="home">
+  <h1 class="door-static"><span data-scr>YOU CAN CALL ME</span><br><span data-scr>FERN, FERNANDO</span><br><span id="whatever" data-scr>OR WHATEVER</span></h1>
+  <button class="door d-about" data-go="about"><span data-scr>MORE</span><br><span data-scr>ABOUT ME</span></button>
+  <button class="door d-hi" data-go="contact"><span data-scr>SAY</span><br><span data-scr>HI</span></button>
+  <button class="door d-title" id="fancy"><span data-scr>CHECK MY</span><br><span data-scr>FANCY TITLE</span></button>
+  <button class="door d-stuff" data-go="stuff"><span data-scr>HERE’S MY</span><br><span data-scr>RANDOM STUFF</span></button>
+  <button class="door d-poke" data-go="poke"><span data-scr>POKE</span><br><span data-scr>ME</span></button>
+
+  <div id="head3d" aria-hidden="true"><img class="head-flat" src="assets/head.png" alt=""></div>
+</main>
+
+<!-- ABOUT: créditos de filme -->
+<section id="about" class="view dark" hidden>
+  <div class="ctl">
+    <button id="spd">1x</button>
+    <button id="lang">EN</button>
+  </div>
+  <button class="x" data-go="">×</button>
+  <div id="leader">3</div>
+  <div id="roll"><div id="rollin"></div></div>
+</section>
+
+<!-- STUFF: esfera -->
+<section id="stuff" class="view" hidden>
+  <button class="back" data-go="">← BACK.</button>
+  <div id="sphere"></div>
+  <p id="cap">THIS IS THE STUFF IN MY HEAD. DRAG TO SPIN, CLICK TO PLAY.</p>
+</section>
+
+<!-- WATCH: trabalho tocando num aparelho antigo -->
+<section id="watch" class="view" hidden>
+  <button class="back" data-go="stuff">← BACK.</button>
+  <div id="gadget"></div>
+  <div id="wcap"></div>
+</section>
+
+<!-- PLAY: portátil com o jogo -->
+<section id="play" class="view" hidden>
+  <button class="back" data-go="stuff">← BACK.</button>
+  <div class="hh">
+    <div class="hh-bezel">
+      <span class="hh-led"></span>
+      <span class="hh-top">FERN vs DEADLINE · 1 PLAYER</span>
+      <div class="hh-scr"><canvas id="gb" width="160" height="144"></canvas><div id="gbhud"></div><div id="gbov"></div></div>
+    </div>
+    <div class="hh-brand"><span class="m">MAG</span><span class="c"><b>P</b><b>O</b><b>C</b><b>K</b><b>E</b><b>T</b></span></div>
+    <div class="hh-ctl">
+      <div class="dpad"><button data-k="up" aria-label="pular"></button><button data-k="left" aria-label="esquerda"></button><button data-k="right" aria-label="direita"></button><button data-k="down" aria-label="baixo"></button></div>
+      <div class="ab"><button data-k="b">B</button><button data-k="a">A</button></div>
+    </div>
+    <div class="ss"><button data-k="select">SELECT</button><button data-k="start">START</button></div>
+  </div>
+  <p class="keys">← → ANDA · Z / ESPAÇO PULA · X CORRE · ENTER START · SELECT SOM</p>
+</section>
+
+<!-- POKE: fern.exe -->
+<section id="poke" class="win" hidden>
+  <header><button class="x sm" data-go="">×</button><span>fern.exe</span></header>
+  <div id="pet3d" aria-hidden="true"></div>
+  <div class="egg">
+    <span class="egg-brand">FERN.PET</span>
+    <div class="egg-lcd"><canvas id="lcd" width="48" height="36"></canvas></div>
+    <div class="egg-btns"><button data-pet="job">JOB</button><button data-pet="sono">SONO</button><button data-pet="breja">BREJA</button><button data-pet="trampo">TRAMPO</button></div>
+  </div>
+  <p id="pmsg"></p>
+  <div id="bars"></div>
+  <div class="game" id="cutgame" hidden>
+    <p id="gmsg">CUT THE BAD TAKE.</p>
+    <div id="tl"><i id="bad"></i><i id="ph"></i></div>
+    <button id="cut">✂ CUT</button>
+    <p id="score">0 clean cuts</p>
+  </div>
+</section>
+
+<!-- CONTACT: claquete -->
+<section id="contact" class="view" hidden>
+  <div class="card">
+    <header><button class="x sm" data-go="">×</button><span>call_me.jpg</span><span>CONTACT</span></header>
+    <div class="cols">
+      <div class="slate">
+        <div class="sticks"></div>
+        <div class="board">
+          <canvas id="pix" width="64" height="64"></canvas>
+          <dl><dt>PROD.</dt><dd>MAG FLAV</dd><dt>SCENE</dt><dd>HI</dd><dt>TAKE</dt><dd>1</dd><dt>DIR.</dt><dd>FERN</dd></dl>
+        </div>
+      </div>
+      <div class="info">
+        <h2>CALL ME</h2><small>LET’S TALK</small>
+        <dl>
+          <dt>EMAIL</dt><dd><a href="mailto:frn.freit@gmail.com">frn.freit@gmail.com</a></dd>
+          <dt>LINKEDIN</dt><dd><a href="https://www.linkedin.com/in/editing" target="_blank" rel="noopener">in/editing</a></dd>
+          <dt>INSTAGRAM</dt><dd><a href="https://www.instagram.com/fern_mag" target="_blank" rel="noopener">@fern_mag</a></dd>
+          <dt>VIMEO</dt><dd><a href="https://vimeo.com/fernstorm" target="_blank" rel="noopener">fernstorm</a></dd>
+          <dt>BEHANCE</dt><dd><a href="https://www.behance.net/fernandoffreitas" target="_blank" rel="noopener">fernandoffreitas</a></dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="js/data.js?v=5"></script>
+<script src="js/game.js?v=5"></script>
+<script src="js/pet.js?v=7"></script>
+<script src="js/site.js?v=6"></script>
+<script type="module" src="js/head3d.js?v=9"></script>
+<script type="module" src="js/pet3d.js?v=14"></script>
+</body>
+</html>
